@@ -60,7 +60,7 @@ pub fn part2(left: []isize, right: []isize) !void {
 
         // Now, move to the next unique value on the left
         while (left_index < left.len and left[left_index] == left_val) {
-            // Each time we advance, we add the score again
+            // Each time we advance, we add the score again, because the left value is the same
             similarity += left_val * count;
             left_index += 1;
         }
