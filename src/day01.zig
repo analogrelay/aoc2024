@@ -10,53 +10,60 @@ pub fn main() !void {
     const path = std.mem.span(std.os.argv[1]);
     var lines = try utils.fileByLines(path, &buffer);
 
-    var leftList = std.ArrayList(isize).init(std.heap.c_allocator);
-    var rightList = std.ArrayList(isize).init(std.heap.c_allocator);
+    var left_list = std.ArrayList(isize).init(std.heap.c_allocator);
+    var right_list = std.ArrayList(isize).init(std.heap.c_allocator);
 
     while (try lines.next()) |line| {
         var splat = std.mem.splitSequence(u8, line, "   ");
         const left = splat.next() orelse return error.InvalidInput;
         const right = splat.next() orelse return error.InvalidInput;
-        try leftList.append(try std.fmt.parseInt(isize, left, 10));
-        try rightList.append(try std.fmt.parseInt(isize, right, 10));
+        try left_list.append(try std.fmt.parseInt(isize, left, 10));
+        try right_list.append(try std.fmt.parseInt(isize, right, 10));
     }
 
-    const leftSlice = try leftList.toOwnedSlice();
-    const rightSlice = try rightList.toOwnedSlice();
-    std.mem.sort(isize, leftSlice, {}, std.sort.asc(isize));
-    std.mem.sort(isize, rightSlice, {}, std.sort.asc(isize));
+    const left_slice = try left_list.toOwnedSlice();
+    const right_slice = try right_list.toOwnedSlice();
+    std.mem.sort(isize, left_slice, {}, std.sort.asc(isize));
+    std.mem.sort(isize, right_slice, {}, std.sort.asc(isize));
 
-    try part1(leftSlice, rightSlice);
-    try part2(leftSlice, rightSlice);
+    try part1(left_slice, right_slice);
+    try part2(left_slice, right_slice);
 }
 
-pub fn part1(leftSlice: []isize, rightSlice: []isize) !void {
+pub fn part1(left: []isize, right: []isize) !void {
     var distanceSum: usize = 0;
-    for (leftSlice, rightSlice) |left, right| {
-        distanceSum += @abs(left - right);
+    for (left, right) |left_val, right_val| {
+        distanceSum += @abs(left_val - right_val);
     }
 
     std.log.info("Part 1 result: {d}", .{distanceSum});
 }
 
-pub fn part2(leftSlice: []isize, rightSlice: []isize) !void {
-    var similarity: usize = 0;
-    for (leftSlice) |left| {
-        var score: usize = 0;
-        // Find the first instance of this in the sorted right slice
-        const first_index = std.mem.indexOfScalar(isize, rightSlice, left);
+pub fn part2(left: []isize, right: []isize) !void {
+    var left_index: usize = 0;
+    var right_index: usize = 0;
+    var similarity: isize = 0;
+    while (left_index < left.len and right_index < right.len) {
+        const left_val = left[left_index];
 
-        // If it was found, we can just seek until an entry that doesn't match, because the list is sorted.
-        if (first_index) |first| {
-            var current = first;
-            while (rightSlice[current] == left) {
-                score += 1;
-                current += 1;
-            }
+        // Advance right index until it's greater than or equal to the candidate
+        while (right_index < right.len and right[right_index] < left_val) {
+            right_index += 1;
         }
 
-        const val: usize = @intCast(left);
-        similarity += val * score;
+        // Compute the score for this candidate by counting the number of times it appears in the right
+        var count: isize = 0;
+        while (right_index < right.len and right[right_index] == left_val) {
+            count += 1;
+            right_index += 1;
+        }
+
+        // Now, move to the next unique value on the left
+        while (left_index < left.len and left[left_index] == left_val) {
+            // Each time we advance, we add the score again
+            similarity += left_val * count;
+            left_index += 1;
+        }
     }
 
     std.log.info("Part 2 result: {d}", .{similarity});
