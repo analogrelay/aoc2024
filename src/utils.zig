@@ -29,6 +29,11 @@ pub fn LinesInput(comptime ReaderType: type) type {
     return InputType;
 }
 
+pub fn fileToStringAlloc(allocator: std.mem.Allocator, path: []const u8) ![]u8 {
+    const file = try std.fs.cwd().openFile(path, .{});
+    return try file.readToEndAlloc(allocator, 4 * 1024 * 1024);
+}
+
 pub fn fileByLines(path: []const u8, buffer: []u8) !LinesInput(std.fs.File.Reader) {
     const file = try std.fs.cwd().openFile(path, .{});
     return readByLines(file.reader(), buffer);
