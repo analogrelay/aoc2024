@@ -1,5 +1,4 @@
 const std = @import("std");
-
 pub fn LinesInput(comptime ReaderType: type) type {
     const InputType = struct {
         reader: ReaderType,

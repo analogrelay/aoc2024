@@ -1,5 +1,6 @@
 const std = @import("std");
 const utils = @import("./utils.zig");
+const grid = @import("./grid.zig");
 
 pub fn main() !void {
     if (std.os.argv.len < 2) {
@@ -28,36 +29,6 @@ pub fn main() !void {
     std.debug.print("Part 2: {}\n", .{part2(line_slice)});
 }
 
-const Point = struct {
-    x: isize,
-    y: isize,
-
-    pub fn add(l: Point, r: Point) Point {
-        return .{
-            .x = l.x + r.x,
-            .y = l.y + r.y,
-        };
-    }
-
-    pub fn timesScalar(self: Point, factor: isize) Point {
-        return .{
-            .x = self.x * factor,
-            .y = self.y * factor,
-        };
-    }
-};
-
-const directions: [8]Point = [_]Point{
-    .{ .x = -1, .y = 0 }, // West
-    .{ .x = -1, .y = -1 }, // North-West
-    .{ .x = 0, .y = -1 }, // North
-    .{ .x = 1, .y = -1 }, // North-East
-    .{ .x = 1, .y = 0 }, // East
-    .{ .x = 1, .y = 1 }, // South-East
-    .{ .x = 0, .y = 1 }, // South
-    .{ .x = -1, .y = 1 }, // South-West
-};
-
 fn part1(lines: []const []const u8) usize {
     var count: usize = 0;
     for (0..lines.len) |y| {
@@ -66,12 +37,12 @@ fn part1(lines: []const []const u8) usize {
                 continue;
             }
 
-            for (directions) |direction| {
-                const point = Point{ .x = @intCast(x), .y = @intCast(y) };
-                const vector = &[3]Point{
-                    Point.add(point, direction.timesScalar(1)),
-                    Point.add(point, direction.timesScalar(2)),
-                    Point.add(point, direction.timesScalar(3)),
+            for (grid.CardinalDirections) |direction| {
+                const point = grid.Vector{ .x = @intCast(x), .y = @intCast(y) };
+                const vector = &[3]grid.Vector{
+                    point.add(direction.timesScalar(1)),
+                    point.add(direction.timesScalar(2)),
+                    point.add(direction.timesScalar(3)),
                 };
                 if (vector_eql(lines, vector, "MAS")) {
                     count += 1;
@@ -137,7 +108,7 @@ test "part2 test" {
     try std.testing.expectEqual(9, part2(lines));
 }
 
-fn vector_eql(matrix: []const []const u8, vector: []const Point, to: []const u8) bool {
+fn vector_eql(matrix: []const []const u8, vector: []const grid.Vector, to: []const u8) bool {
     if (vector.len != to.len) {
         return false;
     }

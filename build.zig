@@ -17,6 +17,17 @@ pub fn build(b: *std.Build) void {
 
     const install_all = b.step("install_all", "Install all days");
 
+    const utils_test = b.addTest(.{
+        .root_source_file = b.path("./src/utils.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+
+    {
+        const test_step = b.step("test_utils", "Test utils");
+        test_step.dependOn(&utils_test.step);
+    }
+
     inline for (0..26) |day| {
         const day_name = b.fmt("day{:0>2}", .{day});
         const exe_name = b.fmt("aoc2024-{s}", .{day_name});

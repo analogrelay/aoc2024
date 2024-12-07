@@ -60,12 +60,15 @@ pub fn main() !void {
     var rule_set: RuleSet = undefined;
     var updates: []Update = undefined;
     try parse_input(allocator, file.reader().any(), &rule_set, &updates);
+    std.debug.print("Parsed input\n", .{});
 
     std.debug.print("Part 1: {}\n", .{try part1(&rule_set, updates)});
     std.debug.print("Part 2: {}\n", .{try part2(&rule_set, updates)});
 }
 
 fn parse_input(allocator: std.mem.Allocator, file_reader: std.io.AnyReader, rule_set: *RuleSet, updates: *[]Update) !void {
+    var timer = try std.time.Timer.start();
+    defer std.debug.print("({}ms) ", .{timer.read() / 1_000_000});
     var buffer: [1024]u8 = undefined;
     var reader = utils.readByLines(file_reader, &buffer);
 
@@ -89,6 +92,8 @@ fn parse_input(allocator: std.mem.Allocator, file_reader: std.io.AnyReader, rule
 }
 
 pub fn part1(rules: *RuleSet, updates: []const Update) !usize {
+    var timer = try std.time.Timer.start();
+    defer std.debug.print("({}ms) ", .{timer.read() / 1_000_000});
     var sum: usize = 0;
     for (updates) |update| {
         if (is_valid(rules, &update)) {
@@ -144,6 +149,8 @@ test "part1" {
 }
 
 pub fn part2(rules: *RuleSet, updates: []Update) !usize {
+    var timer = try std.time.Timer.start();
+    defer std.debug.print("({}ms) ", .{timer.read() / 1_000_000});
     var sum: usize = 0;
     for (updates) |update| {
         if (!is_valid(rules, &update)) {
